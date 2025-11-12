@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from Servo2 import *
+import time
 
 def roi(frame):
     center_x, center_y = 368, 288
@@ -20,7 +21,6 @@ def roi(frame):
 
 def circle_detect(frame):
     circledetect = False
-    #loading image
     (h, w) = frame.shape[:2]
     new_width = 800
     aspect_ratio = h / w
@@ -53,7 +53,13 @@ def circle_detect(frame):
             cv2.rectangle(frame, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1) 
         circledetect = True
     return frame, circledetect
-    
+
+
+last_shot_time = 0
+shot_cooldown = 4.0  # seconds between shots (1.5 + 2 + buffer)
+detection_start_time = 0
+target_detected = False
+shooting_delay = 1.5  # seconds to wait before shooting after detection
 
 cap = cv2.VideoCapture(0)
 # checking if camera is opened
@@ -64,6 +70,7 @@ while (cap.isOpened()):
     # capture frame
     ret, frame = cap.read()
     if ret == True:
+        current_time = time.time()
     
         h, w = frame.shape[:2]
         aspect_ratio = w / h
@@ -71,17 +78,46 @@ while (cap.isOpened()):
         new_height = int(width / aspect_ratio)
         frame = cv2.resize(frame, (width, new_height), interpolation=cv2.INTER_AREA)
 
-        #overlay
+        # overlay
         roiim = roi(frame)
         circleim, _ = circle_detect(frame)
         _, circle = circle_detect(roiim)
-        if circle:
-            time.sleep(1.5)
-            print("SHOOT")
-            set_servo_angle(180)
-            time.sleep(2)
-            break
+        
+        can_shoot = (current_time - last_shot_time) > shot_cooldown
+        
+        if circle and can_shoot and not target_detected:
+            target_detected = True
+            detection_start_time = current_time
+            print("Target detected! Preparing to shoot...")
+        
+        if target_detected:
+            if not circle:
+                target_detected = False
+                print("Target lost - resetting")
+            else:
+                time_since_detection = current_time - detection_start_time
+                
+                countdown = max(0, shooting_delay - time_since_detection)
+                cv2.putText(frame, f"Shooting in: {countdown:.1f}s", (10, 30), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                
+                if time_since_detection >= shooting_delay:
+                    print("SHOOT!")
+                    set_servo_angle(180)
+                    last_shot_time = current_time
+                    target_detected = False
+                    print("Shot completed. Cooldown active.")
+        
+        if (current_time - last_shot_time) < shot_cooldown:
+            remaining = shot_cooldown - (current_time - last_shot_time)
+            cv2.putText(frame, f"Cooldown: {remaining:.1f}s", (10, 60), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        else:
+            cv2.putText(frame, "Ready to shoot", (10, 60), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
+        cv2.imshow('Frame', frame)
+        
         # exiting
         if cv2.waitKey(30) & 0xFF == ord('q'):
             break
