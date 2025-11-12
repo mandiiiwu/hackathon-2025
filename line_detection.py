@@ -56,25 +56,13 @@ def hsv_mask(frame):
 
 def line_detection(frame):
     thinned = cv2.ximgproc.thinning(frame)
-    lines = cv2.HoughLines(thinned, 1, np.pi / 180, 150)
+    lines = cv2.HoughLinesP(thinned, 1, np.pi/180, threshold=50, minLineLength=90, maxLineGap=90)
     result = cv2.cvtColor(thinned, cv2.COLOR_GRAY2BGR)
     if lines is not None:
-        for r_theta in lines:
-            arr = np.array(r_theta[0], dtype=np.float64)
-            r, theta = arr
-            a = np.cos(theta)
-            b = np.sin(theta)
-
-            x0 = a*r
-            y0 = b*r 
-
-            x1 = int(x0 + 1000*(-b))
-            y1 = int(y0 + 1000*(a))
-
-            x2 = int(x0 - 1000*(-b))
-            y2 = int(y0 - 1000*a)
-
-            cv2.line(result, (x1, y1), (x2, y2), (0, 0, 255), 3)
+        print(f'{len(lines)} lines')
+        for point in lines:
+            x1, y1, x2, y2 = point[0]
+            cv2.line(result, (x1, y1), (x2, y2), (0, 0, 255), 3) 
     return result 
 
 def circle_detect(frame):
