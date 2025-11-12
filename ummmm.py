@@ -72,11 +72,8 @@ while (cap.isOpened()):
         frame = cv2.resize(frame, (width, new_height), interpolation=cv2.INTER_AREA)
 
         #overlay
-        cv2.imshow('Video Circle Detection Frame!', frame)
         roiim = roi(frame)
-        cv2.imshow("ROI", roiim)
         circleim, _ = circle_detect(frame)
-        cv2.imshow("circle", circleim)
         _, circle = circle_detect(roiim)
         if circle:
             print("SHOOT")
