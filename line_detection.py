@@ -34,6 +34,11 @@ def get_angle(len1, len2):
     # len2 is the length of the dist btwn the two endpoints 
     return np.arccos(1-(len2**2)/(2*len1**2))
 
+def get_velocity(time, angle):
+    # time is delta time
+    # angle is delta angle
+    return angle/time
+
 def hsv_mask(frame):
     # only look for bright red
     blurred = cv2.GaussianBlur(frame, (5, 5), 0)
