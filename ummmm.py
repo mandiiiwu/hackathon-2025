@@ -13,8 +13,6 @@ def roi(frame):
     y2 = int(center_y + h / 2)
 
     roi = frame[y1:y2, x1:x2]
-
-    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                   
     return roi
 
