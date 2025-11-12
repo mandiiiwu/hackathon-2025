@@ -2,13 +2,13 @@ import lgpio
 import time
 
 
-chip = lgpio.gpiochip_open(0) 
 servo_pin = 18 
 
 frequency = 50
 period = 1_000_000 // frequency  # microseconds per cycle
 
 def set_servo_angle(angle):
+    chip = lgpio.gpiochip_open(0) 
     # angle (0–180°) to pulse width (1000–2000 µs)
     pulse_width = int(1000 + (angle / 180) * 1000)
 
