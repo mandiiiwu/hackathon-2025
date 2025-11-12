@@ -46,11 +46,6 @@ def circle_detect(frame):
     #convert x y coords into ints
         circles = np.round(circles[0, :]).astype("int")
     #looping over coords n radius
-        for (x, y, r) in circles:
-            #drawing circle
-            cv2.circle(frame, (x, y), r, (200, 50, 500), 2)
-            #drawing center
-            cv2.rectangle(frame, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1) 
         circledetect = True
     return frame, circledetect
 
@@ -98,8 +93,6 @@ while (cap.isOpened()):
                 time_since_detection = current_time - detection_start_time
                 
                 countdown = max(0, shooting_delay - time_since_detection)
-                cv2.putText(frame, f"Shooting in: {countdown:.1f}s", (10, 30), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
                 
                 if time_since_detection >= shooting_delay:
                     print("SHOOT!")
@@ -110,11 +103,6 @@ while (cap.isOpened()):
         
         if (current_time - last_shot_time) < shot_cooldown:
             remaining = shot_cooldown - (current_time - last_shot_time)
-            cv2.putText(frame, f"Cooldown: {remaining:.1f}s", (10, 60), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        else:
-            cv2.putText(frame, "Ready to shoot", (10, 60), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
         
         # exiting
         if cv2.waitKey(0):
