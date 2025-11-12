@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from Servo2 import *
 
 def roi(frame):
     center_x, center_y = 368, 288
@@ -54,7 +55,7 @@ def circle_detect(frame):
     return frame, circledetect
     
 
-cap = cv2.VideoCapture("targetshoot.mov")
+cap = cv2.VideoCapture(0)
 # checking if camera is opened
 if (cap.isOpened() == False):
     print("error")
@@ -63,8 +64,14 @@ while (cap.isOpened()):
     # capture frame
     ret, frame = cap.read()
     if ret == True:
-        # applying overlay
-        frame = resize
+    
+        h, w = frame.shape[:2]
+        aspect_ratio = w / h
+        width = 780
+        new_height = int(width / aspect_ratio)
+        frame = cv2.resize(frame, (width, new_height), interpolation=cv2.INTER_AREA)
+
+        #overlay
         cv2.imshow('Video Circle Detection Frame!', frame)
         roiim = roi(frame)
         cv2.imshow("ROI", roiim)
@@ -73,6 +80,8 @@ while (cap.isOpened()):
         _, circle = circle_detect(roiim)
         if circle:
             print("SHOOT")
+            set_servo_angle(180)
+            time.sleep(2)
 
         # exiting
         if cv2.waitKey(30) & 0xFF == ord('q'):
