@@ -119,7 +119,7 @@ while (cap.isOpened()):
         cv2.imshow('Frame', frame)
         
         # exiting
-        if cv2.waitKey(30) & 0xFF == ord('q'):
+        if cv2.waitKey(0):
             break
     else:
         print("vid finished")
