@@ -3,10 +3,10 @@ import numpy as np
 from datetime import datetime
 import math  
 
-def time_diff(time1, time2):
+def time_diff(pa_time, cr_time):
     # format: minute:second:microsecond
-    m1, s1, ms1 = map(int, time1.split(':'))
-    m2, s2, ms2 = map(int, time2.split(':'))
+    m1, s1, ms1 = map(int, pa_time.split(':'))
+    m2, s2, ms2 = map(int, cr_time.split(':'))
 
     return (m2-m1)*60 + (s2-s1) + (ms2-ms1)/1000000 # returns time in seconds 
 
