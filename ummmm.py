@@ -76,10 +76,11 @@ while (cap.isOpened()):
         circleim, _ = circle_detect(frame)
         _, circle = circle_detect(roiim)
         if circle:
-            time.sleep(0.5)
+            time.sleep(1.5)
             print("SHOOT")
             set_servo_angle(180)
             time.sleep(2)
+            break
 
         # exiting
         if cv2.waitKey(30) & 0xFF == ord('q'):
