@@ -1,45 +1,34 @@
 import lgpio
 import time
 
-SERVO_PIN = 18  # Choose your desired GPIO pin (e.g., GPIO18)
-PWM_FREQ = 50   # Standard servo PWM frequency (50 Hz)
 
-    # Open the GPIO chip
-h = lgpio.gpiochip_open(0)
+chip = lgpio.gpiochip_open(0) 
+servo_pin = 18 
 
-    # Start PWM on the chosen pin
-    # The duty cycle for servos is typically defined by pulse width in microseconds
-    # A 50Hz signal has a period of 20,000 microseconds (1,000,000 / 50)
-    # Common pulse widths for 0, 90, and 180 degrees are around 500, 1500, and 2500 us
-lgpio.gpio_start_pwm(h, SERVO_PIN, PWM_FREQ, 0) # Start with 0% duty cycle initially
+frequency = 50
+period = 1_000_000 // frequency  # microseconds per cycle
 
 def set_servo_angle(angle):
-        # Convert angle to pulse width in microseconds
-        # This is a simplified linear mapping; adjust values for your specific servo
-    min_pulse_width = 500  # Microseconds for 0 degrees
-    max_pulse_width = 2500 # Microseconds for 180 degrees
-    pulse_width = min_pulse_width + (angle / 180.0) * (max_pulse_width - min_pulse_width)
+    # angle (0–180°) to pulse width (1000–2000 µs)
+    pulse_width = int(1000 + (angle / 180) * 1000)
 
-        # Calculate duty cycle percentage
-    duty_cycle_percentage = (pulse_width / (1_000_000 / PWM_FREQ)) * 100
+    #duty cycle as % of period
+    duty_cycle = (pulse_width / period) * 100
 
-    lgpio.gpio_set_dutycycle(h, SERVO_PIN, duty_cycle_percentage)
+    lgpio.tx_pwm(chip, servo_pin, frequency, duty_cycle)
+    print(f"Servo angle: {angle}° | Duty cycle: {duty_cycle:.2f}%")
+    time.sleep(0.5)
 
 try:
-    while True:
-            # Move servo to 0 degrees
-        set_servo_angle(0)
-        time.sleep(1)
+    lgpio.gpio_claim_output(chip, servo_pin)
 
-            # Move servo to 90 degrees
-        set_servo_angle(90)
-        time.sleep(1)
+    set_servo_angle(180)
+    time.sleep(2)
 
-            # Move servo to 180 degrees
-        set_servo_angle(180)
-        time.sleep(1)
+    set_servo_angle(0)
+    time.sleep(1)
 
-except KeyboardInterrupt:
-    # Stop PWM and close the GPIO chip on exit
-    lgpio.gpio_stop_pwm(h, SERVO_PIN)
-    lgpio.gpiochip_close(h)
+finally:
+    # Stop PWM and clean up
+    lgpio.tx_pwm(chip, servo_pin, 0, 0)
+    lgpio.gpiochip_close(chip)
