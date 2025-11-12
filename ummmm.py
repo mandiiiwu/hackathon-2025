@@ -115,8 +115,6 @@ while (cap.isOpened()):
         else:
             cv2.putText(frame, "Ready to shoot", (10, 60), 
                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-
-        cv2.imshow('Frame', frame)
         
         # exiting
         if cv2.waitKey(0):
